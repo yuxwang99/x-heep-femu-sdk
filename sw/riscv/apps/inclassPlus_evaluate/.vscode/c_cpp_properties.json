@@ -1,0 +1,17 @@
+{
+    "configurations": [
+        {
+            "name": "Linux",
+            "includePath": [
+                "/home/yuxwang/INCLASS/src_paper/extern/codegen/lib/profile_Yuxuan_iteration/**",
+                "/home/yuxwang/INCLASS/src_paper/extern/codegen/lib/profile_Yuxuan_iteration/examples/**",
+                "/home/yuxwang/INCLASS/src_paper/extern/codegen/lib/include/**"
+            ],
+            "defines": [],
+            "cStandard": "c11",
+            "cppStandard": "c++14",
+            "intelliSenseMode": "linux-gcc-x64"
+        }
+    ],
+    "version": 4
+}
