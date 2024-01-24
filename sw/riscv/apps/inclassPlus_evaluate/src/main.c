@@ -41,6 +41,7 @@
 #include "profile_Yuxuan_iteration_types.h"
 #include "rt_nonfinite.h"
 #include <string.h>
+#include <sys/time.h>
 
 /* Function Declarations */
 static void argInit_1x13_real_T(double result[13]);
@@ -387,13 +388,13 @@ static void main_profile_Yuxuan_iteration(void)
   argInit_cell_0(&r);
   argInit_90x1_boolean_T(bv);
 
-  struct timeval currentTime;
-    gettimeofday(&currentTime, NULL);
+//  struct timeval currentTime;
+//   gettimeofday(&currentTime, NULL);
 
     // Calculate milliseconds
-    long milliseconds = currentTime.tv_sec * 1000 + currentTime.tv_usec / 1000;
+//    long milliseconds = currentTime.tv_sec * 1000 + currentTime.tv_usec / 1000;
 
-    printf("Current time in milliseconds: %ld\n", milliseconds);
+//    printf("Current time in milliseconds: %ld\n", milliseconds);
 
 
   profile_Yuxuan_iteration(ECG_Seiz_Window_tmp, ECG_Seiz_Window_tmp,
