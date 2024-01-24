@@ -11,16 +11,26 @@ from pynq import x_heep
 x_heep = x_heep()
 
 # Compile the application
-x_heep.compile_app("hello_world")
+x_heep.compile_app("virtual_obi_write")
+
+# Init the OBI memory
+obi = x_heep.init_obi_mem()
+
+# Reset the OBI memory
+x_heep.reset_obi_mem(obi)
 
 # Run the application
 x_heep.run_app()
 
-# Verify the output
-stdout_path = "/home/xilinx/x-heep-femu-sdk/sw/riscv/build/stdout.txt"
-expected_output = "Hello World!"
-f = open(stdout_path, "r")
-if f.read().strip() == expected_output:
+# Read the OBI memory
+obi_read = x_heep.read_obi_mem(obi)
+target_read = list()
+for i in range(1024):
+    target_read.append(i ** 2)
+if target_read == obi_read:
     print("Test Passed!")
 else:
     print("Test Failed!")
+
+# Delete OBI
+del obi
