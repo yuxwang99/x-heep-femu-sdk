@@ -7,17 +7,18 @@
 from pynq import Overlay
 from pynq import MMIO
 from pynq import allocate
+from pynq import GPIO
 import os
 import sys
 import csv
-import subprocess
-import serial
-import threading
+import time
 
-ADC_OFFSET = 0x40000000
-FLASH_AXI_ADDRESS_ADDER_OFFSET = 0x43C00000
-OBI_AXI_ADDRESS_ADDER_OFFSET = 0x43C10000
-PERFORMANCE_COUNTERS_OFFSET = 0x43C20000
+ADC_OFFSET                         = 0x40000000
+FLASH_AXI_ADDRESS_ADDER_OFFSET     = 0x43C00000
+OBI_AXI_ADDRESS_ADDER_OFFSET       = 0x43C10000
+PERFORMANCE_COUNTERS_OFFSET        = 0x43C20000
+R_OBI_AXI_BRIDGE_OFFSET            = 0x43C30000
+R_OBI_BAA_AXI_ADDRESS_ADDER_OFFSET = 0x43C40000
 
 class x_heep(Overlay):
 
@@ -25,7 +26,9 @@ class x_heep(Overlay):
 
         # Load bitstream
         super().__init__("/home/xilinx/x-heep-femu-sdk/hw/x_heep.bit", **kwargs)
-        self.uart_data = []
+        self.release_reset()
+        self.release_execute_from_flash()
+        self.release_boot_select()
 
 
     def load_bitstream(self):
@@ -110,6 +113,56 @@ class x_heep(Overlay):
 
         # Debug application (no Jupyter support)
         os.system("/home/xilinx/x-heep-femu-sdk/sw/arm/sdk/run_app.sh debug")
+
+
+    def assert_reset(self):
+
+        # Set the active-high GPIO reset to 1 (active-low X-HEEP reset to 0)
+        output = GPIO(GPIO.get_gpio_pin(5), 'out')
+        output.write(1)
+
+
+    def release_reset(self):
+
+        # Set the active-high GPIO reset to 0 (active-low X-HEEP reset to 1)
+        output = GPIO(GPIO.get_gpio_pin(5), 'out')
+        output.write(0)
+
+
+    def assert_boot_select(self):
+
+        # Set the boot_select GPIO pin to 1
+        gpio_boot_select = GPIO(GPIO.get_gpio_pin(6), 'out')
+        gpio_boot_select.write(1)
+
+
+    def release_boot_select(self):
+
+        # Set the boot_select GPIO pin to 0
+        gpio_boot_select = GPIO(GPIO.get_gpio_pin(6), 'out')
+        gpio_boot_select.write(0)
+
+
+    def assert_execute_from_flash(self):
+
+        # Set the execute_from_flash GPIO pin to 1
+        gpio_execute_from_flash = GPIO(GPIO.get_gpio_pin(7), 'out')
+        gpio_execute_from_flash.write(1)
+
+
+    def release_execute_from_flash(self):
+
+        # Set the execute_from_flash GPIO pin to 0
+        gpio_execute_from_flash = GPIO(GPIO.get_gpio_pin(7), 'out')
+        gpio_execute_from_flash.write(0)
+
+
+    def reset_pulse(self):
+
+        # Reset X-HEEP by sending a pulse of reset
+        self.assert_reset()
+        time.sleep(0.005)
+        self.release_reset()
 
 
     def init_flash(self):
@@ -221,6 +274,28 @@ class x_heep(Overlay):
 
         # Read OBI memory
         return list(obi)
+
+
+    def init_r_obi(self, memory_bank_id):
+
+        # Write reverse OBI memory base address to AXI address adder
+        axi_address_adder = MMIO(R_OBI_BAA_AXI_ADDRESS_ADDER_OFFSET, 0x4)
+        axi_address_adder.write(0x0, 0x00008000 * memory_bank_id)
+
+
+    def write_r_obi(self, data, offset, width):
+
+        # Write reverse OBI
+        reverse_obi_bridge = MMIO(R_OBI_AXI_BRIDGE_OFFSET, width)
+        reverse_obi_bridge.write(offset, data)
+
+
+    def read_r_obi(self, offset, width):
+
+        # Read reverse OBI
+        reverse_obi_bridge = MMIO(R_OBI_AXI_BRIDGE_OFFSET, width)
+        data_read = reverse_obi_bridge.read(offset)
+        return data_read
 
 
     def init_perf_cnt(self):
