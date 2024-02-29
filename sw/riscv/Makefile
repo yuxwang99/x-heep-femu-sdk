@@ -40,8 +40,24 @@ INC_FOLDERS_GCC    = $(addprefix -I ,$(INC_FOLDERS))
 %.dis: %.elf
 	$(RISCV_EXE_PREFIX)objdump -S $< > $@
 
+apps/floating_point_test/floating_point_test.elf: apps/floating_point_test/floating_point_test.c
+	$(RISCV_EXE_PREFIX)gcc -march=rv32imfc -o $@ -w -Os -g -nostdlib \
+	$(CUSTOM_GCC_FLAGS) \
+	-DHOST_BUILD \
+	-T link/link.ld \
+	-I $(RISCV)/riscv32-unknown-elf/include \
+	$(INC_FOLDERS_GCC) \
+	-static \
+	$(LIB_CRT) \
+	$^ $(LIB_RUNTIME) \
+	$(LIB_BASE) \
+	$(LIB_DRIVERS) \
+	-Wl,-Map=apps/floating_point_test/floating_point_test.map \
+	-L $(RISCV)/riscv32-unknown-elf/lib \
+	-lc -lm -lgcc -flto -ffunction-sections -fdata-sections -specs=nano.specs
+
 apps/hello_world/hello_world.elf: apps/hello_world/hello_world.c
-	$(RISCV_EXE_PREFIX)gcc -march=rv32imc -o $@ -w -Os -g -nostdlib \
+	$(RISCV_EXE_PREFIX)gcc -march=rv32imfc -o $@ -w -Os -g -nostdlib \
 		$(CUSTOM_GCC_FLAGS) \
 		-DHOST_BUILD \
 		-T link/link.ld \

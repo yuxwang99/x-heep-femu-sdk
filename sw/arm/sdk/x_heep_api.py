@@ -11,6 +11,9 @@ from pynq import GPIO
 import os
 import sys
 import csv
+import subprocess
+import serial
+import threading
 import time
 
 ADC_OFFSET                         = 0x40000000
