@@ -23,7 +23,7 @@ LIB_DRIVERS        += $(wildcard lib/hal/gpio/*.c)
 LIB_DRIVERS        += $(wildcard lib/hal/i2c/*.c)
 LIB_DRIVERS        += $(wildcard lib/hal/dma/*.c)
 LIB_DRIVERS        += $(wildcard lib/hal/power_manager/*.c)
-LIB_DRIVERS        += $(wildcard lib/hal/fast_intr_ctrl/*.c)
+{COMP_FOLDER}/LIB_DRIVERS        += $(wildcard lib/hal/fast_intr_ctrl/*.c)
 LIB_DRIVERS        += $(wildcard lib/hal/spi_mem/*.c)
 LIB_DRIVERS        += $(wildcard lib/hal/spi_memio/*.c)
 LIB_DRIVERS        += $(wildcard lib/hal/spi_host/*.c)
@@ -83,7 +83,7 @@ apps/virtual_flash_read/virtual_flash_read.elf: apps/virtual_flash_read/virtual_
 		$(LIB_CRT) \
 		$^ $(LIB_RUNTIME) \
 		$(LIB_BASE) \
-		$(LIB_DRIVERS) \
+{COMP_FOLDER}/		$(LIB_DRIVERS) \
 		-Wl,-Map=apps/virtual_flash_read/virtual_flash_read.map \
 		-L $(RISCV)/riscv32-unknown-elf/lib \
 		-lc -lm -lgcc -flto -ffunction-sections -fdata-sections -specs=nano.specs
@@ -232,5 +232,28 @@ apps/virtual_ddr/virtual_ddr.elf: apps/virtual_ddr/virtual_ddr.c
 		-L $(RISCV)/riscv32-unknown-elf/lib \
 		-lc -lm -lgcc -flto -ffunction-sections -fdata-sections -specs=nano.specs
 
+SRCS := $(wildcard apps/seizure/examples_single/main.c)
+SRCS += $(wildcard apps/seizure/INCLASS_iterative_test_single/*.c)
+apps/seizure/seizure.elf:$(SRCS)
+	$(RISCV_EXE_PREFIX)gcc -march=rv32imc -o $@ -w -Os -g -nostdlib \
+		$(CUSTOM_GCC_FLAGS) \
+		 -DHOST_BUILD \
+		-T link/link.ld \
+		-I $(RISCV)/riscv32-unknown-elf/include \
+		$(INC_FOLDERS_GCC) \
+		-I apps/seizure/INCLASS_iterative_test_single \
+		-I apps/seizure/include \
+		-static \
+		$(LIB_CRT) \
+		$^ $(LIB_RUNTIME) \
+		$(LIB_BASE) \
+		$(LIB_DRIVERS) \
+		-Wl,-Map=apps/seizure/seizure.map \
+		-L $(RISCV)/riscv32-unknown-elf/lib \
+		-lc -lm -lgcc -flto -ffunction-sections -fdata-sections -specs=nano.specs
+
 clean:
 	rm -rf build
+
+
+

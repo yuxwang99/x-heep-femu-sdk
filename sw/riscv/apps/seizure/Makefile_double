@@ -1,0 +1,33 @@
+CC := gcc
+CFLAGS := -Wall -Wextra -std=c11
+LDFLAGS := -lm -ltcmalloc -pg
+
+# COMP_FOLDER := Yuxuan_iterative_test
+# SRCS := ./main.c
+# EXECUTABLE := IterPlus_seizure
+
+COMP_FOLDER := INCLASS_iterative_test
+SRCS := ./examples/main.c
+EXECUTABLE := Iterative_seizure
+
+SRCS += $(wildcard ${COMP_FOLDER}/*.c)
+
+OBJS := $(SRCS:.c=.o)
+
+
+all: $(EXECUTABLE)
+
+$(EXECUTABLE): $(SRCS)
+	$(CC) $(CFLAGS) \
+		-I ${COMP_FOLDER} \
+		-I include \
+		$^ -o $@ $(LDFLAGS)
+
+# %.o: %.c
+# 	$(CC) $(CFLAGS) \
+# 		-I ${COMP_FOLDER} \
+# 		-I include \
+# 		-c $< -o $@
+
+clean:
+	rm -f $(OBJS) $(EXECUTABLE)
